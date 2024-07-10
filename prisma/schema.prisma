@@ -1,0 +1,90 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider          = "mysql"
+  url               = env("DATABASE_URL")
+  shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
+}
+
+model Aluno {
+  id             Int      @id @default(autoincrement())
+  nome           String
+  sexo           String
+  idade          String
+  responsavel    String
+  dataNascimento DateTime
+  observacao     String?
+  turma          String
+}
+
+model Usuarios {
+  id         Int     @id @default(autoincrement())
+  nome       String
+  user       String @unique
+  password   String
+  permission String
+  photoPath  String?
+}
+
+model Tokens {
+  id         Int      @id @default(autoincrement())
+  userId     Int
+  user       String
+  permission String
+  token      String   @db.LongText
+  createAt   DateTime @default(now())
+  expiresAt  DateTime
+}
+
+model LogUsers {
+  id       Int      @id @default(autoincrement())
+  userId   Int
+  user     String
+  token    String   @db.LongText
+  datatime DateTime
+  info     String
+}
+
+model ChamadaJuniores {
+  id        Int                  @id @default(autoincrement())
+  Data      DateTime
+  Professor String
+  Titulo    String
+  Alunos    AlunoChamadaJunior[]
+}
+
+model AlunoChamadaJunior {
+  id        Int             @id @default(autoincrement())
+  NomeAluno String
+  Presenca  String
+  ChamadaId Int
+  Chamada   ChamadaJuniores @relation(fields: [ChamadaId], references: [id])
+}
+
+model ChamadaMaternal {
+  id        Int                    @id @default(autoincrement())
+  Data      DateTime
+  Professor String
+  Titulo    String
+  Alunos    AlunoChamadaMaternal[]
+}
+
+model AlunoChamadaMaternal {
+  id        Int             @id @default(autoincrement())
+  NomeAluno String
+  Presenca  String
+  ChamadaId Int
+  Chamada   ChamadaMaternal @relation(fields: [ChamadaId], references: [id])
+}
+
+model Config {
+  id          Int       @id @default(autoincrement())
+  name        String
+  description String?
+  key         String    @unique
+  value       Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime? @updatedAt
+}
