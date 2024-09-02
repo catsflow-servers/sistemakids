@@ -248,16 +248,23 @@ router.post('/change/password/user', async (req, res) => {
 router.post('/change/password/admin', async (req, res) => {
   const { userId, newPassword } = req.body;
 
-  try {
-    await prisma.usuarios.update({
-      where: { id: userId },
-      data: { password: newPassword },
-    });
+  if (!userId) {
+    return res.status(400).json({ message: 'ID do usuário não fornecido' });
+  }
 
+  try {
+    const updatedUser = await prisma.usuarios.update({
+      where: {
+        id: parseInt(userId, 10),
+      },
+      data: {
+        password: newPassword,
+      },
+    });
     res.status(200).json({ message: 'Senha alterada com sucesso' });
   } catch (error) {
     console.error('Erro ao alterar senha:', error);
-    res.status(500).json({ message: 'Erro interno do servidor' });
+    res.status(500).json({ message: 'Erro ao alterar senha' });
   }
 });
 

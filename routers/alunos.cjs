@@ -29,16 +29,16 @@ router.post('/register', async (req, res) => {
   }
 });
 
-//* Endpoint para procurar alunos dos juniores
+// Endpoint para procurar alunos dos juniores
 router.get('/search/juniores', async (req, res) => {
   try {
-    // console.log("Iniciando busca por alunos juniores...");
     const { sexo, ordem } = req.query;
     let whereClause = { turma: "Juniores" };
 
     if (sexo) {
       whereClause.sexo = sexo;
     }
+
     let orderByClause = { nome: 'asc' };
     if (ordem === 'A-Z') {
       orderByClause = { nome: 'asc' };
@@ -48,10 +48,9 @@ router.get('/search/juniores', async (req, res) => {
 
     const alunosJuniores = await prisma.aluno.findMany({
       where: whereClause,
-      orderBy: orderByClause
+      orderBy: orderByClause,
     });
 
-    // console.log("Alunos juniores encontrados:", alunosJuniores);
     res.json(alunosJuniores);
   } catch (error) {
     console.error("Erro ao buscar alunos juniores:", error);

@@ -1,7 +1,7 @@
 {
-  "name": "sistemakids",
+  "name": "sistemakids-server",
   "private": true,
-  "version": "B1.2.0",
+  "version": "B1.3.3",
   "type": "module",
   "github": "https://github.com/catsflow-servers/sistemakids",
   "scripts": {
