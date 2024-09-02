@@ -65,7 +65,7 @@ router.get('/presenca/:id', async (req, res) => {
   }
 });
 
-router.post('/classes/user', async (req, res) => {
+router.post('/user', async (req, res) => {
   const { userId } = req.body;
 
   try {

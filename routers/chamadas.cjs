@@ -10,12 +10,17 @@ const getCurrentDateTimeInSaoPaulo = () => DateTime.now().setZone('America/Sao_P
 
 //* Endpoint para registrar chamada dos juniores
 router.post('/register/juniores', async (req, res) => {
-  const { professor, tituloAula, alunos, dataAula } = req.body; // Usar 'professor' ao invés de 'userName'
+  const { professor, tituloAula, alunos, dataAula } = req.body;
 
   try {
     // Verificando se professor é uma string válida
     if (typeof professor !== 'string' || professor.trim() === '') {
       return handleErro(res, 'Nome do professor é inválido', 400);
+    }
+
+    // Verificando se dataAula é uma data válida
+    if (!DateTime.fromISO(dataAula).isValid) {
+      return handleErro(res, 'Data da aula é inválida', 400);
     }
 
     const config = await prisma.config.findUnique({ where: { key: 'limitar_chamadas_por_dia' } });
@@ -38,7 +43,7 @@ router.post('/register/juniores', async (req, res) => {
     await prisma.chamadaJuniores.create({
       data: {
         Data: dataAula,
-        Professor: professor, // Usar 'professor' ao invés de 'userName'
+        Professor: professor,
         Titulo: tituloAula,
         Alunos: {
           create: alunos.map(aluno => ({
@@ -51,7 +56,7 @@ router.post('/register/juniores', async (req, res) => {
 
     res.json({ message: 'Chamada dos juniores salva com sucesso' });
   } catch (error) {
-    console.error('Erro ao salvar chamada dos juniores:', error); // Log do erro detalhado
+    console.error('Erro ao salvar chamada dos juniores:', error);
     handleErro(res, 'Erro ao salvar chamada dos juniores', 500);
   }
 });
@@ -110,7 +115,7 @@ router.get('/gerenciar/juniores/:id', async (req, res) => {
   }
 });
 
-//* Endpoint para atualizar dados da chamada do juniores
+// Endpoint para atualizar dados da chamada do juniores
 router.put('/update/juniores/:id', async (req, res) => {
   const { id } = req.params;
   const { chamada, alunos } = req.body;
@@ -146,7 +151,6 @@ router.put('/update/juniores/:id', async (req, res) => {
     res.status(500).json({ error: 'Erro ao atualizar dados da chamada' });
   }
 });
-
 
 //* Endpoint para excluir chamada do juniores
 router.delete('/excluir/juniores/:id', async (req, res) => {
@@ -185,14 +189,39 @@ router.delete('/excluir/juniores/:id', async (req, res) => {
   }
 });
 
+//* Endpoint para obter a última chamada dos juniores
+router.get('/last/juniores', async (req, res) => {
+  try {
+    const lastChamada = await prisma.chamadaJuniores.findFirst({
+      orderBy: {
+        id: 'desc',
+      },
+    });
+
+    if (!lastChamada) {
+      return res.status(404).json({ message: 'Nenhuma chamada encontrada' });
+    }
+
+    res.json(lastChamada);
+  } catch (error) {
+    console.error('Erro ao buscar a última chamada dos juniores:', error);
+    handleErro(res, 'Erro ao buscar a última chamada dos juniores', 500);
+  }
+});
+
 //* Endpoint para registrar chamada do maternal
 router.post('/register/maternal', async (req, res) => {
-  const { userName, tituloAula, alunos, dataAula } = req.body; // Certificando-se de que todos os campos necessários estão presentes
+  const { professor, tituloAula, alunos, dataAula } = req.body;
 
   try {
-    // Verificando se userName é uma string válida
-    if (typeof userName !== 'string' || userName.trim() === '') {
+    // Verificando se professor é uma string válida
+    if (typeof professor !== 'string' || professor.trim() === '') {
       return handleErro(res, 'Nome do professor é inválido', 400);
+    }
+
+    // Verificando se dataAula é uma data válida
+    if (!DateTime.fromISO(dataAula).isValid) {
+      return handleErro(res, 'Data da aula é inválida', 400);
     }
 
     const config = await prisma.config.findUnique({ where: { key: 'limitar_chamadas_por_dia' } });
@@ -215,7 +244,7 @@ router.post('/register/maternal', async (req, res) => {
     await prisma.chamadaMaternal.create({
       data: {
         Data: dataAula,
-        Professor: userName, // Certificando-se de que userName é uma string e está sendo passado corretamente
+        Professor: professor,
         Titulo: tituloAula,
         Alunos: {
           create: alunos.map(aluno => ({
@@ -228,7 +257,7 @@ router.post('/register/maternal', async (req, res) => {
 
     res.json({ message: 'Chamada do maternal salva com sucesso' });
   } catch (error) {
-    console.error('Erro ao salvar chamada do maternal:', error); // Log do erro detalhado
+    console.error('Erro ao salvar chamada do maternal:', error);
     handleErro(res, 'Erro ao salvar chamada do maternal', 500);
   }
 });
@@ -357,6 +386,26 @@ router.delete('/excluir/maternal/:id', async (req, res) => {
   } catch (error) {
     console.error('Erro ao excluir chamada:', error);
     res.status(500).json({ error: 'Erro ao excluir chamada.' });
+  }
+});
+
+//* Endpoint para obter a última chamada dos juniores
+router.get('/last/maternal', async (req, res) => {
+  try {
+    const lastChamada = await prisma.chamadaMaternal.findFirst({
+      orderBy: {
+        id: 'desc',
+      },
+    });
+
+    if (!lastChamada) {
+      return res.status(404).json({ message: 'Nenhuma chamada encontrada' });
+    }
+
+    res.json(lastChamada);
+  } catch (error) {
+    console.error('Erro ao buscar a última chamada dos maternal:', error);
+    handleErro(res, 'Erro ao buscar a última chamada dos maternal', 500);
   }
 });
 

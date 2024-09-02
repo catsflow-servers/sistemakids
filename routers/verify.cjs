@@ -76,12 +76,16 @@ router.post('/name', async (req, res) => {
   }
 });
 
-router.post('/profile', async (req, res) => {
-  const { userId } = req.body;
-  
+router.get('/profile', async (req, res) => {
+  const userId = req.query.userId;
+
+  if (!userId) {
+    return res.status(400).json({ error: 'userId é obrigatório' });
+  }
+
   try {
     const user = await prisma.usuarios.findUnique({
-      where: { id: parseInt(userId) }
+      where: { id: parseInt(userId) },
     });
 
     if (user) {
@@ -90,7 +94,7 @@ router.post('/profile', async (req, res) => {
         nome: user.nome,
         user: user.user,
         permission: user.permission,
-        photoPath: user.photoPath
+        photoPath: user.photoPath,
       });
     } else {
       res.status(404).json({ error: 'Usuário não encontrado' });
@@ -102,12 +106,22 @@ router.post('/profile', async (req, res) => {
 
 router.get('/usuarios', async (req, res) => {
   try {
-    const usuarios = await prisma.usuarios.findMany();
+    const usuarios = await prisma.Usuarios.findMany({
+      select: {
+        id: true,
+        nome: true,
+        permission: true,
+      },
+    });
     res.json(usuarios);
   } catch (error) {
-    console.error('Erro ao buscar usuários:', error);
+    console.error("Erro ao buscar usuários:", error);
     res.status(500).json({ error: 'Erro ao buscar usuários' });
   }
+});
+
+router.get('/server', (req, res) => {
+  res.status(200).send('Servidor está funcional!');
 });
 
 module.exports = router;
